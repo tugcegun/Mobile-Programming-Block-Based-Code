@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>App Inventor Simülatörü v2 - Gerçek Bloklar</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #222;
+  }
+  h1 {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    background: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: 0.2s;
+    font-size: 13px;
+  }
+  .tab:hover { transform: translateY(-2px); }
+  .tab.active { background: #ffd54f; color: #222; }
+
+  .container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* ============ Telefon ============ */
+  .phone {
+    width: 320px; height: 600px;
+    background: #1a1a1a;
+    border-radius: 35px;
+    padding: 50px 15px 50px 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone::before {
+    content: ''; position: absolute;
+    top: 18px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 6px; background: #333; border-radius: 3px;
+  }
+  .phone::after {
+    content: ''; position: absolute;
+    bottom: 15px; left: 50%; transform: translateX(-50%);
+    width: 50px; height: 50px; border: 3px solid #333; border-radius: 50%;
+  }
+  .screen {
+    width: 100%; height: 100%;
+    background: #f5f5f5;
+    border-radius: 8px;
+    overflow: auto;
+    padding: 15px;
+    font-size: 14px;
+  }
+  .app-title {
+    background: #4a90e2; color: white;
+    padding: 10px;
+    margin: -15px -15px 15px -15px;
+    text-align: center; font-weight: bold;
+    border-radius: 8px 8px 0 0;
+  }
+
+  /* App Inventor bileşenleri */
+  .ai-checkbox { display: flex; align-items: center; margin: 8px 0; cursor: pointer; }
+  .ai-checkbox input { width: 18px; height: 18px; margin-right: 8px; }
+  .ai-image {
+    width: 100%; height: 180px;
+    background: #e0e0e0; border: 1px solid #999;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 90px; margin: 10px 0;
+  }
+  .ai-textbox {
+    width: 100%; padding: 8px; margin: 5px 0;
+    border: 1px solid #999; border-radius: 4px; font-size: 14px;
+  }
+  .ai-button {
+    background: #ddd; border: 1px solid #999;
+    padding: 10px 20px; cursor: pointer;
+    font-weight: bold; border-radius: 4px;
+    margin: 5px; font-size: 14px;
+  }
+  .ai-button:hover { background: #ccc; }
+  .ai-button:active { background: #bbb; }
+  .ai-listview {
+    border: 1px solid #999; background: #fff;
+    min-height: 100px; max-height: 180px; overflow-y: auto;
+    margin: 10px 0;
+  }
+  .ai-listview-item {
+    padding: 8px; border-bottom: 1px solid #eee; cursor: pointer;
+  }
+  .ai-listview-item:hover { background: #e3f2fd; }
+  .ai-spinner {
+    width: 100%; padding: 8px; margin: 5px 0;
+    border: 1px solid #999; border-radius: 4px; font-size: 14px;
+    background: white;
+  }
+  .ai-label { font-weight: bold; margin: 5px 0; }
+  .notifier {
+    position: absolute; bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.85); color: white;
+    padding: 10px 18px; border-radius: 20px;
+    font-size: 13px; opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none; max-width: 260px; text-align: center;
+  }
+  .notifier.show { opacity: 1; }
+
+  /* ============ APP INVENTOR BLOKLARI - DOĞRU RENKLER ============ */
+  .blocks-panel {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 620px;
+    max-height: 700px;
+    overflow: auto;
+  }
+  .blocks-panel h2 {
+    color: #4a90e2; margin-bottom: 12px;
+    border-bottom: 2px solid #4a90e2; padding-bottom: 8px;
+  }
+  .designer-info {
+    background: #e8f5e9;
+    border-left: 4px solid #43a047;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  .workspace {
+    background: #fafafa;
+    border: 1px solid #ccc;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 20px 20px;
+    padding: 20px 12px;
+    margin: 10px 0;
+    overflow: auto;
+    min-height: 200px;
+  }
+
+  .blk {
+    display: inline-block;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    color: #fff;
+    user-select: none;
+    position: relative;
+    margin-bottom: 6px;
+    cursor: grab;
+  }
+  .blk:active { cursor: grabbing; }
+  .blk.dragging { z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+
+  /* WHEN — Sarı event başlığı */
+  .when {
+    background: #e6a82e;
+    border-radius: 6px;
+    border: 1px solid #b8801e;
+    padding-bottom: 8px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .when-title {
+    padding: 8px 14px;
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  /* response/local parameter chip - turuncu küçük etiket */
+  .param-chip {
+    background: #e08c2f;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 4px;
+    border: 1px solid #b86e1c;
+    font-size: 11px;
+    margin: 0 4px 4px 24px;
+    display: inline-block;
+  }
+  .when-do {
+    display: flex;
+    gap: 6px;
+    padding-left: 12px;
+    align-items: flex-start;
+  }
+  .when-do-label {
+    color: #fff; font-weight: 500;
+    padding: 4px 0;
+  }
+  .when-body {
+    flex: 1;
+    background: #e6a82e;
+    margin-left: 4px;
+    padding: 4px 10px 4px 14px;
+    border-left: 3px solid #b8801e;
+    min-height: 24px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* IF — Sarı, sağa girintili */
+  .if {
+    background: #e6a82e;
+    border: 1px solid #b8801e;
+    border-radius: 6px;
+    padding: 6px 0;
+    margin: 2px 0;
+  }
+  .if-row {
+    padding: 4px 14px;
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .if-body {
+    background: #e6a82e;
+    margin-left: 18px;
+    padding: 4px 10px 4px 14px;
+    border-left: 3px solid #b8801e;
+    min-height: 24px;
+  }
+
+  /* COMPONENT GETTER (TextBox1.Text gibi) — YEŞİL */
+  .getter {
+    display: inline-flex;
+    align-items: center;
+    background: #2d9e58;
+    color: #fff;
+    border: 1px solid #1f7440;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .getter .dot::after { content: ' . '; opacity: 0.7; }
+  .getter .arrow::after { content: ' ▾'; font-size: 9px; opacity: 0.8; }
+
+  /* COMPONENT SETTER (set ListView1.Elements to) — YEŞİL */
+  .setter {
+    display: inline-flex;
+    align-items: center;
+    background: #2d9e58;
+    color: #fff;
+    border: 1px solid #1f7440;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    gap: 4px;
+    flex-wrap: wrap;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+
+  /* COMPONENT METHOD CALL (call ListView1.CreateElement) — MOR */
+  .call {
+    display: inline-flex;
+    flex-direction: column;
+    background: #9270b0;
+    color: #fff;
+    border: 1px solid #6a4f87;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 3px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .call .head { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .call .arg {
+    display: flex; align-items: center; gap: 4px;
+    margin-left: 14px;
+    flex-wrap: wrap;
+  }
+  .call .arg-label {
+    font-size: 11px; opacity: 0.95;
+  }
+
+  /* LIST OPERATIONS (add items to list, is in list?) — AÇIK MAVİ/CYAN */
+  .list-op {
+    display: inline-flex;
+    flex-direction: column;
+    background: #4f95c3;
+    color: #fff;
+    border: 1px solid #356f96;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 3px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .list-op .head { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .list-op .arg {
+    display: flex; align-items: center; gap: 4px;
+    margin-left: 14px;
+    flex-wrap: wrap;
+  }
+  .gear::before {
+    content: '⚙';
+    background: #1976d2; color: #fff;
+    width: 14px; height: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 10px; margin-right: 4px;
+  }
+
+  /* VARIABLE GET (get global liste, get response) — TURUNCU */
+  .var-get {
+    display: inline-flex;
+    align-items: center;
+    background: #e08c2f;
+    color: #fff;
+    border: 1px solid #b86e1c;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .var-get .arrow::after { content: ' ▾'; font-size: 9px; opacity: 0.8; }
+
+  /* TEXT (string) — PEMBE/KIRMIZI */
+  .txt-block {
+    display: inline-flex;
+    align-items: center;
+    background: #d4506e;
+    color: #fff;
+    border: 1px solid #a83a55;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 12px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .txt-block::before { content: '" '; opacity: 0.6; }
+  .txt-block::after { content: ' "'; opacity: 0.6; }
+
+  /* LOGIC (true/false, =) — KOYU YEŞİL */
+  .logic {
+    display: inline-flex;
+    align-items: center;
+    background: #1f9249;
+    color: #fff;
+    border: 1px solid #146634;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 12px;
+    gap: 4px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+  .logic.bool {
+    padding: 3px 12px;
+  }
+  .logic.bool.false {
+    background: #c0392b;
+    border-color: #922b1f;
+  }
+
+  /* MATH/Number — MAVİ */
+  .math {
+    display: inline-flex;
+    align-items: center;
+    background: #5b80b5;
+    color: #fff;
+    border: 1px solid #3d5a82;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 12px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+  }
+
+  /* Component name dropdown chip (Notifier1, Button1) */
+  .comp {
+    background: #fff;
+    color: #333;
+    padding: 1px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    border: 1px solid rgba(0,0,0,0.25);
+    display: inline-flex;
+    align-items: center;
+  }
+  .comp::after {
+    content: ' ▾';
+    font-size: 9px;
+    color: #666;
+    margin-left: 2px;
+  }
+
+  /* Toolbox kategori etiketleri */
+  .toolbox {
+    margin-bottom: 12px;
+  }
+  .toolbox-row {
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .tb-cat {
+    padding: 4px 10px;
+    color: white;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .tb-control { background: #e6a82e; }
+  .tb-logic   { background: #1f9249; }
+  .tb-math    { background: #5b80b5; }
+  .tb-text    { background: #d4506e; }
+  .tb-lists   { background: #4f95c3; }
+  .tb-var     { background: #e08c2f; }
+  .tb-proc    { background: #9270b0; }
+  .tb-comp    { background: #2d9e58; }
+
+  .explanation {
+    background: #fff9c4;
+    border-left: 4px solid #fbc02d;
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .explanation h3 { color: #f57c00; margin-bottom: 8px; }
+  .explanation li { margin: 5px 0 5px 20px; }
+
+  .hidden { display: none; }
+
+  .hint {
+    background: #fff3e0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #5d4037;
+    margin-bottom: 10px;
+    border-left: 3px solid #ff9800;
+  }
+</style>
+</head>
+<body>
+
+<h1>📱 App Inventor Simülatörü v2 — Doğru Renklerle Bloklar</h1>
+
+<div class="tabs">
+  <button class="tab active" onclick="showExample(1)">1: CheckBox</button>
+  <button class="tab" onclick="showExample(2)">2: Liste</button>
+  <button class="tab" onclick="showExample(3)">3: Pause</button>
+  <button class="tab" onclick="showExample(4)">4: Stop</button>
+  <button class="tab" onclick="showExample(5)">5: Marş</button>
+  <button class="tab" onclick="showExample(6)">6: Notifier ⭐</button>
+  <button class="tab" onclick="showExample(7)">7: Split ⭐</button>
+  <button class="tab" onclick="showExample(8)">8: Slider ⭐</button>
+  <button class="tab" onclick="showExample(9)">9: Fonksiyon ⭐</button>
+  <button class="tab" onclick="showExample(10)">10: For Each ⭐</button>
+  <button class="tab" onclick="showExample(11)">11: Hesap Mak. ⭐</button>
+  <button class="tab" onclick="showExample(12)">12: Alışveriş ⭐</button>
+</div>
+
+<!-- ============== ÖRNEK 1 ============== -->
+<div id="ex1" class="container">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 1 - Resim Seç</div>
+      <label class="ai-checkbox"><input type="checkbox" id="cb1" onchange="cb1Changed()"> Tavuk</label>
+      <label class="ai-checkbox"><input type="checkbox" id="cb2" onchange="cb2Changed()"> Üzüm</label>
+      <label class="ai-checkbox"><input type="checkbox" id="cb3" onchange="cb3Changed()"> Peynir</label>
+      <div class="ai-image" id="img1"></div>
+    </div>
+    <div class="notifier" id="notif1"></div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info"><b>Designer:</b> 3 CheckBox + 1 Image</div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-logic">Logic</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-comp">CheckBox1/2/3</div>
+        <div class="tb-cat tb-comp">Image1</div>
+      </div>
+    </div>
+    <div class="hint">💡 Bloklar sürüklenebilir.</div>
+
+    <div class="workspace">
+      <!-- when CheckBox1.Changed -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">CheckBox1</span> .Changed</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">
+                  if
+                  <span class="logic">
+                    <span class="getter"><span class="comp">CheckBox1</span><span class="dot"></span><span class="arrow">Checked</span></span>
+                    =
+                    <span class="logic bool">true</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Image1</span> . <span class="comp">Picture</span> to <span class="txt-block">tavuk.png</span></div><br>
+                  <div class="setter">set <span class="comp">CheckBox2</span> . <span class="comp">Checked</span> to <span class="logic bool false">false</span></div><br>
+                  <div class="setter">set <span class="comp">CheckBox3</span> . <span class="comp">Checked</span> to <span class="logic bool false">false</span></div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Image1</span> . <span class="comp">Picture</span> to <span class="txt-block"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- when CheckBox2 -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">CheckBox2</span> .Changed</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic"><span class="getter"><span class="comp">CheckBox2</span><span class="dot"></span><span class="arrow">Checked</span></span> = <span class="logic bool">true</span></span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Image1</span> . <span class="comp">Picture</span> to <span class="txt-block">uzum.png</span></div><br>
+                  <div class="setter">set <span class="comp">CheckBox1</span> . <span class="comp">Checked</span> to <span class="logic bool false">false</span></div><br>
+                  <div class="setter">set <span class="comp">CheckBox3</span> . <span class="comp">Checked</span> to <span class="logic bool false">false</span></div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Image1</span> . <span class="comp">Picture</span> to <span class="txt-block"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- when CheckBox3 -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">CheckBox3</span> .Changed</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic"><span class="getter"><span class="comp">CheckBox3</span><span class="dot"></span><span class="arrow">Checked</span></span> = <span class="logic bool">true</span></span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Image1</span> . <span class="comp">Picture</span> to <span class="txt-block">peynir.png</span></div><br>
+                  <div class="setter">set <span class="comp">CheckBox1</span> . <span class="comp">Checked</span> to <span class="logic bool false">false</span></div><br>
+                  <div class="setter">set <span class="comp">CheckBox2</span> . <span class="comp">Checked</span> to <span class="logic bool false">false</span></div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Image1</span> . <span class="comp">Picture</span> to <span class="txt-block"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>App Inventor Renk Kodları (Doğru)</h3>
+      <ul>
+        <li>🟡 <b>Sarı</b> → Event (when), Control (if/else, for each)</li>
+        <li>🟢 <b>Yeşil</b> → Component setter/getter (set/get TextBox.Text)</li>
+        <li>🟣 <b>Mor</b> → Component method call (call Player.Start)</li>
+        <li>🔵 <b>Açık mavi</b> → List işlemleri (add items to list)</li>
+        <li>🟠 <b>Turuncu</b> → Variables (get global, get response)</li>
+        <li>🩷 <b>Pembe</b> → Text/string blokları</li>
+        <li>🟢 <b>Koyu yeşil</b> → Logic (true/false, =)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 2 ============== -->
+<div id="ex2" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 2 - Liste İşlemleri</div>
+      <div class="ai-label">İsim Ekle:</div>
+      <input type="text" class="ai-textbox" id="tb1" placeholder="Yeni isim...">
+      <button class="ai-button" onclick="btnEkleClick()">EKLE</button>
+      <div class="ai-label">İsim Ara:</div>
+      <input type="text" class="ai-textbox" id="tb2" placeholder="Aranan isim...">
+      <button class="ai-button" onclick="btnAraClick()">ARA</button>
+      <div class="ai-label">Liste:</div>
+      <div class="ai-listview" id="lv1"></div>
+    </div>
+    <div class="notifier" id="notif2"></div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info"><b>Designer:</b> 2 TextBox + 2 Button + 1 ListView + 1 Notifier</div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-lists">Lists</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-comp">TextBox1/2</div>
+        <div class="tb-cat tb-comp">ListView1</div>
+        <div class="tb-cat tb-comp">Notifier1</div>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnEkle</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="list-op">
+                    <span class="head">is in list? thing
+                      <span class="getter"><span class="comp">TextBox1</span> . <span class="arrow">Text</span></span>
+                      list
+                      <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Elements</span></span>
+                    </span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call">
+                    <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                    <div class="arg"><span class="arg-label">notice</span> <span class="txt-block">Bu isim zaten listede var!</span></div>
+                  </div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="list-op">
+                    <div class="head"><span class="gear"></span>add items to list</div>
+                    <div class="arg"><span class="arg-label">list</span> <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Elements</span></span></div>
+                    <div class="arg"><span class="arg-label">item</span> <span class="getter"><span class="comp">TextBox1</span> . <span class="arrow">Text</span></span></div>
+                  </div><br>
+                  <div class="setter">set <span class="comp">ListView1</span> . <span class="comp">Elements</span> to <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Elements</span></span></div><br>
+                  <div class="setter">set <span class="comp">TextBox1</span> . <span class="comp">Text</span> to <span class="txt-block"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnAra</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="list-op">
+                    <span class="head">is in list? thing
+                      <span class="getter"><span class="comp">TextBox2</span> . <span class="arrow">Text</span></span>
+                      list
+                      <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Elements</span></span>
+                    </span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call">
+                    <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                    <div class="arg"><span class="arg-label">notice</span>
+                      <span class="txt-block" style="background:#d4506e;">join</span>
+                      <span class="txt-block">Bulundu: </span>
+                      <span class="getter"><span class="comp">TextBox2</span> . <span class="arrow">Text</span></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="call">
+                    <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                    <div class="arg"><span class="arg-label">notice</span> <span class="txt-block">Bu isim listede yok!</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>Önemli Renk Notları</h3>
+      <ul>
+        <li><b>is in list?</b> ve <b>add items to list</b> → açık mavi (Lists)</li>
+        <li><b>TextBox1.Text</b> → yeşil (component getter)</li>
+        <li><b>call Notifier1.ShowAlert</b> → mor (method call)</li>
+        <li><b>set ListView1.Elements to</b> → yeşil (component setter)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 3 ============== -->
+<div id="ex3" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 3 - Pause</div>
+      <div style="text-align:center; padding:30px 0;">
+        <div style="font-size:80px;">🎵</div>
+        <div id="player3-status" style="margin:15px 0; font-size:13px; color:#555;">Hazır</div>
+        <div style="background:#ddd; height:8px; border-radius:4px; overflow:hidden; margin:10px 0;">
+          <div id="player3-bar" style="height:100%; background:#4a90e2; width:0%; transition:width 0.2s;"></div>
+        </div>
+        <div id="player3-time" style="font-size:12px; color:#888;">0:00 / 0:30</div>
+      </div>
+      <div style="text-align:center;">
+        <button class="ai-button" id="btnCal3" onclick="btnCal3Click()" style="font-size:18px; padding:15px 40px;">ÇAL</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info"><b>Designer:</b> 1 Button + 1 Player (muzik.mp3)</div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-comp">BtnCal</div>
+        <div class="tb-cat tb-comp">Player1</div>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnCal</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic">
+                    <span class="getter"><span class="comp">BtnCal</span> . <span class="arrow">Text</span></span>
+                    =
+                    <span class="txt-block">ÇAL</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Start</span></div></div><br>
+                  <div class="setter">set <span class="comp">BtnCal</span> . <span class="comp">Text</span> to <span class="txt-block">DURDUR</span></div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Pause</span></div></div><br>
+                  <div class="setter">set <span class="comp">BtnCal</span> . <span class="comp">Text</span> to <span class="txt-block">ÇAL</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>⏸️ Pause</h3>
+      <ul>
+        <li>Mor blok: <b>call Player1.Pause</b> → kaldığı yeri hatırlar</li>
+        <li>Tekrar Start'a basınca o saniyeden devam eder</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 4 ============== -->
+<div id="ex4" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 4 - Stop</div>
+      <div style="text-align:center; padding:30px 0;">
+        <div style="font-size:80px;">🎵</div>
+        <div id="player4-status" style="margin:15px 0; font-size:13px; color:#555;">Hazır</div>
+        <div style="background:#ddd; height:8px; border-radius:4px; overflow:hidden; margin:10px 0;">
+          <div id="player4-bar" style="height:100%; background:#e74c3c; width:0%; transition:width 0.2s;"></div>
+        </div>
+        <div id="player4-time" style="font-size:12px; color:#888;">0:00 / 0:30</div>
+      </div>
+      <div style="text-align:center;">
+        <button class="ai-button" id="btnCal4" onclick="btnCal4Click()" style="font-size:18px; padding:15px 40px;">ÇAL</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info"><b>Designer:</b> 1 Button + 1 Player</div>
+
+    <div class="workspace">
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnCal</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic">
+                    <span class="getter"><span class="comp">BtnCal</span> . <span class="arrow">Text</span></span>
+                    =
+                    <span class="txt-block">ÇAL</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Start</span></div></div><br>
+                  <div class="setter">set <span class="comp">BtnCal</span> . <span class="comp">Text</span> to <span class="txt-block">DURDUR</span></div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Stop</span></div></div><br>
+                  <div class="setter">set <span class="comp">BtnCal</span> . <span class="comp">Text</span> to <span class="txt-block">ÇAL</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>⏹️ Stop (SINAV!)</h3>
+      <ul>
+        <li><b>Pause</b> → kaldığı yerden devam</li>
+        <li><b>Stop</b> → baştan başlar</li>
+        <li>Tek fark: mor blokta method adı (Pause ↔ Stop)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 5 ============== -->
+<div id="ex5" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 5 - Marş Çalar</div>
+      <div class="ai-label">Marş Seçin:</div>
+      <select class="ai-spinner" id="spinner1">
+        <option>İstiklal Marşı</option>
+        <option>Gençlik Marşı</option>
+        <option>Onuncu Yıl Marşı</option>
+      </select>
+      <button class="ai-button" onclick="btnEkleMars()">LİSTEYE EKLE</button>
+      <div class="ai-label">Çalmak için tıkla:</div>
+      <div class="ai-listview" id="lv5"></div>
+      <div id="player5-status" style="text-align:center; padding:10px; font-size:13px; color:#4a90e2;">▶️ Şu an çalan: -</div>
+    </div>
+    <div class="notifier" id="notif5"></div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info"><b>Designer:</b> Spinner1 + BtnEkle + ListView1 + Player1 + Notifier1</div>
+
+    <div class="workspace">
+      <!-- Initialize -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Screen1</span> .Initialize</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="setter">
+                set <span class="comp">ListView1</span> . <span class="comp">Elements</span> to
+                <span class="list-op" style="display:inline-flex;flex-direction:row;gap:4px;padding:3px 8px;"><span class="head">create empty list</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- BtnEkle -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnEkle</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="list-op">
+                    <span class="head">is in list? thing
+                      <span class="getter"><span class="comp">Spinner1</span> . <span class="arrow">Selection</span></span>
+                      list
+                      <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Elements</span></span>
+                    </span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call">
+                    <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                    <div class="arg"><span class="arg-label">notice</span> <span class="txt-block">Bu marş zaten listede!</span></div>
+                  </div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="list-op">
+                    <div class="head"><span class="gear"></span>add items to list</div>
+                    <div class="arg"><span class="arg-label">list</span> <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Elements</span></span></div>
+                    <div class="arg"><span class="arg-label">item</span> <span class="getter"><span class="comp">Spinner1</span> . <span class="arrow">Selection</span></span></div>
+                  </div><br>
+                  <div class="setter">set <span class="comp">ListView1</span> . <span class="comp">Elements</span> to <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Elements</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- AfterPicking -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">ListView1</span> .AfterPicking</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic">
+                    <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Selection</span></span>
+                    = <span class="txt-block">İstiklal Marşı</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Player1</span> . <span class="comp">Source</span> to <span class="txt-block">istiklal.mp3</span></div><br>
+                  <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Start</span></div></div>
+                </div>
+                <div class="if-row">else if
+                  <span class="logic">
+                    <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Selection</span></span>
+                    = <span class="txt-block">Gençlik Marşı</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Player1</span> . <span class="comp">Source</span> to <span class="txt-block">genclik.mp3</span></div><br>
+                  <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Start</span></div></div>
+                </div>
+                <div class="if-row">else if
+                  <span class="logic">
+                    <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Selection</span></span>
+                    = <span class="txt-block">Onuncu Yıl Marşı</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="setter">set <span class="comp">Player1</span> . <span class="comp">Source</span> to <span class="txt-block">onuncu.mp3</span></div><br>
+                  <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Start</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 6 — NOTIFIER (En Basit) ============== -->
+<div id="ex6" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 6 - Notifier (Selamlama)</div>
+      <div class="ai-label">Adınızı yazın:</div>
+      <input type="text" class="ai-textbox" id="tb6" placeholder="Örn: Ayşe">
+      <div style="text-align:center; margin-top:15px;">
+        <button class="ai-button" onclick="btnSelamlaClick()" style="font-size:16px; padding:12px 30px;">SELAMLA</button>
+      </div>
+      <div style="text-align:center; padding:20px; font-size:60px;">👋</div>
+    </div>
+    <div class="notifier" id="notif6"></div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info">
+      <b>Designer:</b><br>
+      • TextBox1 (ad girişi)<br>
+      • Button1 (Text="SELAMLA")<br>
+      • Notifier1 (görünmez bileşenlerden)
+    </div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-proc">Procedures</div>
+        <div class="tb-cat tb-comp">Button1</div>
+        <div class="tb-cat tb-comp">TextBox1</div>
+        <div class="tb-cat tb-comp">Notifier1</div>
+      </div>
+    </div>
+
+    <div class="hint">💡 En basit Notifier kullanımı: butona basınca uyarı mesajı gösterir.</div>
+
+    <div class="workspace">
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Button1</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="call">
+                <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                <div class="arg">
+                  <span class="arg-label">notice</span>
+                  <span class="txt-block" style="background:#d4506e;">join</span>
+                  <span class="txt-block">Merhaba, </span>
+                  <span class="getter"><span class="comp">TextBox1</span> . <span class="arrow">Text</span></span>
+                  <span class="txt-block">!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>📌 Notifier Bloğu Açıklaması</h3>
+      <ul>
+        <li><b>Notifier1</b> → görünmez bir bileşendir, ekrana çıkmaz</li>
+        <li><b>call Notifier1.ShowAlert</b> (mor) → kısa süreli uyarı gösterir, kullanıcı dokunmadan kaybolur</li>
+        <li><b>notice</b> parametresi → gösterilecek metin</li>
+        <li><b>join</b> (pembe) → "Merhaba, " + ad + "!" şeklinde birleştirir</li>
+        <li><b>TextBox1.Text</b> (yeşil) → kutuya yazılan metni alır</li>
+      </ul>
+      <h3 style="margin-top:10px;">🆚 Notifier'ın Diğer Method'ları</h3>
+      <ul>
+        <li><b>ShowAlert(notice)</b> → kısa toast mesajı (bu örnek)</li>
+        <li><b>ShowMessageDialog</b> → OK butonlu pencere</li>
+        <li><b>ShowChooseDialog</b> → 2 seçenekli (Evet/Hayır) pencere</li>
+        <li><b>ShowTextDialog</b> → kullanıcıdan yazı ister, <span style="color:#d4506e;font-weight:bold;">AfterTextInput</span> event'iyle cevap alınır</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 7 — SPLIT (Spinner + ListView + Player) ============== -->
+<div id="ex7" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 7 - Split ile Marş</div>
+      <div class="ai-label">Marş Seçin (uzantılı):</div>
+      <select class="ai-spinner" id="spinner7">
+        <option>istiklal.mp3</option>
+        <option>genclik.mp3</option>
+        <option>onuncu.mp3</option>
+      </select>
+      <button class="ai-button" onclick="btnEkle7Click()">EKLE</button>
+      <div class="ai-label">Liste (uzantısız):</div>
+      <div class="ai-listview" id="lv7"></div>
+      <div id="player7-status" style="text-align:center; padding:8px; font-size:12px; color:#4a90e2;">▶️ Şu an çalan: -</div>
+      <div style="background:#fff3e0; padding:8px; border-radius:4px; font-size:11px; margin-top:8px; border-left:3px solid #ff9800;">
+        <b>Mantık:</b> Spinner'da <code>istiklal.mp3</code><br>
+        ListView'da: <code>istiklal</code> (split + index 1)<br>
+        Çalarken: <code>istiklal + .mp3</code> (join)
+      </div>
+    </div>
+    <div class="notifier" id="notif7"></div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info">
+      <b>Designer:</b> Spinner1 (ElementsFromString=<code>istiklal.mp3, genclik.mp3, onuncu.mp3</code>) + BtnEkle + ListView1 + Player1 + Notifier1
+    </div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-lists">Lists</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-var">Variables</div>
+        <div class="tb-cat tb-comp">Spinner1</div>
+        <div class="tb-cat tb-comp">ListView1</div>
+        <div class="tb-cat tb-comp">Player1</div>
+      </div>
+    </div>
+
+    <div class="hint">💡 <b>Split Mantığı:</b> "istiklal.mp3" → split at "." → ["istiklal","mp3"] → index 1 → "istiklal"</div>
+
+    <div class="workspace">
+      <!-- 1. Global değişken (TURUNCU initialize global) -->
+      <div class="blk">
+        <div class="when" style="background:#e08c2f; border-color:#b86e1c;">
+          <div class="when-title">
+            initialize global <span class="comp">kayitlar</span> to
+            <span class="list-op" style="display:inline-flex;flex-direction:row;gap:4px;padding:3px 8px;"><span class="head">create empty list</span></span>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- 2. Ekle butonu -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnEkle</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="list-op">
+                    <span class="head">is in list? thing
+                      <span class="getter"><span class="comp">Spinner1</span> . <span class="arrow">Selection</span></span>
+                      list
+                      <span class="var-get">get global <span class="arrow">kayitlar</span></span>
+                    </span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call">
+                    <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                    <div class="arg"><span class="arg-label">notice</span> <span class="txt-block">Bu ses zaten listede!</span></div>
+                  </div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="list-op">
+                    <div class="head"><span class="gear"></span>add items to list</div>
+                    <div class="arg"><span class="arg-label">list</span> <span class="var-get">get global <span class="arrow">kayitlar</span></span></div>
+                    <div class="arg" style="align-items:flex-start;">
+                      <span class="arg-label">item</span>
+                      <span class="list-op" style="background:#4f95c3;">
+                        <span class="head">select list item</span>
+                        <div class="arg" style="align-items:flex-start;">
+                          <span class="arg-label">list</span>
+                          <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                            split text
+                            <span class="getter"><span class="comp">Spinner1</span> . <span class="arrow">Selection</span></span>
+                            at
+                            <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">"."</span>
+                          </span>
+                        </div>
+                        <div class="arg"><span class="arg-label">index</span> <span class="math">1</span></div>
+                      </span>
+                    </div>
+                  </div><br>
+                  <div class="setter">
+                    set <span class="comp">ListView1</span> . <span class="comp">Elements</span> to
+                    <span class="var-get">get global <span class="arrow">kayitlar</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- 3. AfterPicking -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">ListView1</span> .AfterPicking</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="setter">
+                set <span class="comp">Player1</span> . <span class="comp">Source</span> to
+                <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                  join
+                  <span class="getter"><span class="comp">ListView1</span> . <span class="arrow">Selection</span></span>
+                  <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">".mp3"</span>
+                </span>
+              </div><br>
+              <div class="call"><div class="head">call <span class="comp">Player1</span> . <span class="comp">Start</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>🔪 Split Mantığı (Sınav için Kritik!)</h3>
+      <ul>
+        <li><b>split text</b> (pembe, Text) → metni belirli karakterden böler, <u>liste döner</u></li>
+        <li><code>"istiklal.mp3"</code> + split at <code>"."</code> → <code>["istiklal", "mp3"]</code></li>
+        <li><b>select list item index 1</b> (mavi, Lists) → 1. elemanı alır → <code>"istiklal"</code></li>
+        <li>Böylece ListView'da <u>uzantısız temiz ad</u> görünür</li>
+        <li><b>join</b> (pembe) → seçim + ".mp3" → tekrar tam dosya adı yapılır, Player'a verilir</li>
+      </ul>
+      <h3 style="margin-top:10px;">🆚 Karşılaştırma</h3>
+      <ul>
+        <li>SoundRecorder: <code>/storage/.../dosya.3gp</code> → split at <code>"/"</code> → index 5</li>
+        <li>HTTPS URL: <code>https://site.com/sesler/istiklal.mp3</code> → split at <code>"/"</code> → index 5</li>
+        <li>Bu örnek: <code>istiklal.mp3</code> → split at <code>"."</code> → index 1</li>
+        <li>📌 <b>Hangi karakterden böldüğüne göre index seçilir</b></li>
+      </ul>
+      <h3 style="margin-top:10px;">3 Adım Özet</h3>
+      <ul>
+        <li>1️⃣ <b>Böl:</b> split text ... at "..."</li>
+        <li>2️⃣ <b>Seç:</b> select list item index N</li>
+        <li>3️⃣ <b>Ekle:</b> add items to list</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 8 — SLIDER ÇARPIM (PDF s.1) ============== -->
+<div id="ex8" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 8 - Slider Çarpım</div>
+      <div class="ai-label">X değeri:</div>
+      <input type="range" id="slider1" min="0" max="50" value="0" oninput="slider1Changed()" style="width:100%; accent-color:#ffc107;">
+      <div class="ai-label">Y değeri:</div>
+      <input type="range" id="slider2" min="0" max="50" value="0" oninput="slider2Changed()" style="width:100%; accent-color:#ffc107;">
+      <div style="text-align:center; padding:30px 10px; font-size:24px; font-weight:bold;" id="label1">0 X 0 = 0</div>
+      <div style="background:#fff3e0; padding:8px; border-radius:4px; font-size:11px; border-left:3px solid #ff9800;">
+        Slider'lar 0–50 arası. <code>round()</code> ile tam sayıya yuvarlanır, <code>join</code> ile metin birleştirilir.
+      </div>
+    </div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info">
+      <b>Designer:</b> Slider1, Slider2, Label1
+    </div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-math">Math</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-var">Variables</div>
+        <div class="tb-cat tb-comp">Slider1/2</div>
+        <div class="tb-cat tb-comp">Label1</div>
+      </div>
+    </div>
+
+    <div class="hint">💡 <b>Teknik:</b> Global değişkenler + Slider olayı + round + join</div>
+
+    <div class="workspace">
+      <!-- Global değişkenler -->
+      <div class="blk">
+        <div class="when" style="background:#e08c2f; border-color:#b86e1c;">
+          <div class="when-title">initialize global <span class="comp">x</span> to <span class="math">0</span></div>
+        </div>
+      </div>
+      <br>
+      <div class="blk">
+        <div class="when" style="background:#e08c2f; border-color:#b86e1c;">
+          <div class="when-title">initialize global <span class="comp">y</span> to <span class="math">0</span></div>
+        </div>
+      </div>
+      <br>
+
+      <!-- Screen1.Initialize -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Screen1</span> .Initialize</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="setter">set <span class="comp">Slider1</span> . <span class="comp">MaxValue</span> to <span class="math">50</span></div><br>
+              <div class="setter">set <span class="comp">Slider2</span> . <span class="comp">MaxValue</span> to <span class="math">50</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- Slider1.PositionChanged -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Slider1</span> .PositionChanged</div>
+          <div class="param-chip">thumbPosition</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="setter">
+                set global <span class="comp">x</span> to
+                <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                  round
+                  <span class="var-get">get <span class="arrow">thumbPosition</span></span>
+                </span>
+              </div><br>
+              <div class="setter">
+                set <span class="comp">Label1</span> . <span class="comp">Text</span> to
+                <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                  <span class="gear"></span>join
+                  <span class="var-get">get global <span class="arrow">x</span></span>
+                  <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">" X "</span>
+                  <span class="var-get">get global <span class="arrow">y</span></span>
+                  <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">" = "</span>
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    <span class="var-get">get global <span class="arrow">x</span></span>
+                    ×
+                    <span class="var-get">get global <span class="arrow">y</span></span>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- Slider2.PositionChanged -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Slider2</span> .PositionChanged</div>
+          <div class="param-chip">thumbPosition</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="setter">
+                set global <span class="comp">y</span> to
+                <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                  round
+                  <span class="var-get">get <span class="arrow">thumbPosition</span></span>
+                </span>
+              </div><br>
+              <div class="setter">
+                set <span class="comp">Label1</span> . <span class="comp">Text</span> to
+                <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                  <span class="gear"></span>join
+                  <span class="var-get">get global <span class="arrow">x</span></span>
+                  <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">" X "</span>
+                  <span class="var-get">get global <span class="arrow">y</span></span>
+                  <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">" = "</span>
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    <span class="var-get">get global <span class="arrow">x</span></span>
+                    ×
+                    <span class="var-get">get global <span class="arrow">y</span></span>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>📌 Teknik Bilgiler</h3>
+      <ul>
+        <li><b>initialize global</b> (turuncu) → uygulama açılınca değişkene ilk değer atar</li>
+        <li><b>Slider.PositionChanged</b> → kullanıcı slider'ı her oynattığında tetiklenir</li>
+        <li><b>thumbPosition</b> (turuncu chip) → olay parametresi, slider'ın anlık değerini taşır</li>
+        <li><b>round</b> (mavi, Math) → ondalıklı sayıyı tam sayıya yuvarlar</li>
+        <li><b>join</b> (pembe, Text) → birden çok değeri tek metne çevirir</li>
+        <li><b>Slider.MaxValue</b> → slider'ın üst sınırını belirler (Initialize'da kuruldu)</li>
+      </ul>
+      <h3 style="margin-top:10px;">⚠ Sorun: Kod Tekrarı</h3>
+      <p style="margin:5px 20px;">Slider1 ve Slider2 olaylarındaki Label güncelleme kodu <b>aynı</b>. Örnek 9'da bunu fonksiyon ile çözeceğiz.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 9 — FONKSIYON (Procedure + Parametre) ============== -->
+<div id="ex9" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 9 - Fonksiyonlu Çarpım</div>
+      <div class="ai-label">X değeri:</div>
+      <input type="range" id="slider1b" min="0" max="50" value="0" oninput="slider1bChanged()" style="width:100%; accent-color:#9270b0;">
+      <div class="ai-label">Y değeri:</div>
+      <input type="range" id="slider2b" min="0" max="50" value="0" oninput="slider2bChanged()" style="width:100%; accent-color:#9270b0;">
+      <div style="text-align:center; padding:30px 10px; font-size:24px; font-weight:bold; color:#9270b0;" id="label1b">0 X 0 = 0</div>
+      <div style="background:#f3e5f5; padding:8px; border-radius:4px; font-size:11px; border-left:3px solid #9270b0;">
+        <b>Aynı uygulama, aynı sonuç</b> — ama bu sefer <code>guncelle(x, y)</code> fonksiyonu ile yazıldı. Daha az kod, daha temiz.
+      </div>
+    </div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info">
+      <b>Designer:</b> Aynı (Slider1, Slider2, Label1)
+    </div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-math">Math</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-var">Variables</div>
+        <div class="tb-cat tb-proc">Procedures ⭐</div>
+        <div class="tb-cat tb-comp">Slider1/2</div>
+      </div>
+    </div>
+
+    <div class="hint">💡 <b>Teknik:</b> Tekrar eden kodu <code>to guncelle x y</code> fonksiyonuna taşıdık. Slider olayları sadece <code>call guncelle</code> diyor.</div>
+
+    <div class="workspace">
+      <!-- Procedure tanımı: to guncelle x y -->
+      <div class="blk">
+        <div style="background:#9270b0; border:1px solid #6a4f87; border-radius:6px; padding-bottom:8px; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);">
+          <div style="padding:8px 14px; color:#fff; font-weight:500;">
+            <span class="gear"></span>to <span class="comp">guncelle</span>
+            <span class="param-chip" style="background:#e08c2f;">x</span>
+            <span class="param-chip" style="background:#e08c2f;">y</span>
+          </div>
+          <div style="padding:0 12px;">
+            <div style="color:#fff; padding-left:12px;">do</div>
+            <div style="background:#9270b0; margin-left:12px; padding:4px 10px 4px 14px; border-left:3px solid #6a4f87;">
+              <div class="setter">
+                set <span class="comp">Label1</span> . <span class="comp">Text</span> to
+                <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                  <span class="gear"></span>join
+                  <span class="var-get">get <span class="arrow">x</span></span>
+                  <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">" X "</span>
+                  <span class="var-get">get <span class="arrow">y</span></span>
+                  <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">" = "</span>
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    <span class="var-get">get <span class="arrow">x</span></span>
+                    ×
+                    <span class="var-get">get <span class="arrow">y</span></span>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- Slider1 olayı: kısa! -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Slider1</span> .PositionChanged</div>
+          <div class="param-chip">thumbPosition</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="call">
+                <div class="head">call <span class="comp">guncelle</span></div>
+                <div class="arg">
+                  <span class="arg-label">x</span>
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    round <span class="var-get">get <span class="arrow">thumbPosition</span></span>
+                  </span>
+                </div>
+                <div class="arg">
+                  <span class="arg-label">y</span>
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    round <span class="getter"><span class="comp">Slider2</span> . <span class="arrow">ThumbPosition</span></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- Slider2 olayı: kısa! -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Slider2</span> .PositionChanged</div>
+          <div class="param-chip">thumbPosition</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="call">
+                <div class="head">call <span class="comp">guncelle</span></div>
+                <div class="arg">
+                  <span class="arg-label">x</span>
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    round <span class="getter"><span class="comp">Slider1</span> . <span class="arrow">ThumbPosition</span></span>
+                  </span>
+                </div>
+                <div class="arg">
+                  <span class="arg-label">y</span>
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    round <span class="var-get">get <span class="arrow">thumbPosition</span></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>📌 Procedure (Fonksiyon) Mantığı</h3>
+      <ul>
+        <li><b>Mor blok</b> → procedure tanımı (Procedures kategorisinden)</li>
+        <li><b>to <span style="background:#9270b0;color:#fff;padding:1px 6px;border-radius:3px;">guncelle</span></b> → fonksiyonun adı</li>
+        <li><b>input: x, input: y</b> → mavi gear (⚙) ikonuna basıp parametre ekleniyor</li>
+        <li><b>get x, get y</b> → fonksiyon İÇİNDE turuncu lokal parametre olarak okunur</li>
+        <li><b>call guncelle</b> → olaydan fonksiyonu çağır, x ve y değerlerini gönder</li>
+      </ul>
+      <h3 style="margin-top:10px;">🆚 Örnek 8 ↔ Örnek 9</h3>
+      <ul>
+        <li>Ö8: 2 slider olayında <b>aynı kod 2 kez</b> yazıldı (kopyala-yapıştır kötü!)</li>
+        <li>Ö9: Kod 1 yere taşındı → değişiklik gerekirse tek yerden yapılır</li>
+        <li>Bu prensip: <b>DRY — Don't Repeat Yourself</b></li>
+      </ul>
+      <h3 style="margin-top:10px;">⚙ Parametre Eklemek</h3>
+      <p style="margin:5px 20px;">Procedure bloğundaki mavi <b>gear (⚙)</b> ikonuna tıkla → "input: x" küçük bloğunu sürükle → procedure başlığına yapıştır. Birden fazla input ekleyebilirsin.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 10 — FOR EACH + EVERY BUTTON + ANY BUTTON ============== -->
+<div id="ex10" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 10 - Buton Grid + Selam</div>
+      <div class="ai-label">Bir butona bas (kaç kere selam yazılsın):</div>
+      <div id="btnGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; margin:10px 0;"></div>
+      <div class="ai-label" style="margin-top:10px;">Sonuç:</div>
+      <div id="label10" style="background:#fff; border:1px solid #999; padding:10px; min-height:60px; font-size:13px; word-wrap:break-word; border-radius:4px;"></div>
+      <div style="background:#fff3e0; padding:8px; border-radius:4px; font-size:11px; border-left:3px solid #ff9800; margin-top:8px;">
+        Buton metinleri <code>for each</code> döngüsüyle <b>otomatik</b> 1–12 ayarlandı. Tıklanan butonun değeri kadar "selam" yazılır.
+      </div>
+    </div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info">
+      <b>Designer:</b> 12 Button (Button1...Button12) + Label1<br>
+      <b>Screen2</b> başlığı kullanılmış (PDF'teki gibi)
+    </div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control ⭐</div>
+        <div class="tb-cat tb-lists">Lists</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-math">Math</div>
+        <div class="tb-cat tb-var">Variables</div>
+        <div class="tb-cat tb-proc">Procedures</div>
+        <div class="tb-cat tb-comp">Any Button ⭐</div>
+      </div>
+    </div>
+
+    <div class="hint">💡 <b>3 Yeni Teknik:</b> ① <code>for each item in list every Button</code> ② <code>when any Button.Click</code> ③ <code>set ... of component ... to</code></div>
+
+    <div class="workspace">
+      <!-- Initialize: tüm butonlara metin ata (ters sırayla 12,11,...1) -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Screen2</span> .Initialize</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if" style="background:#e6a82e;">
+                <div class="if-row">
+                  for each <span class="param-chip">item</span> in list
+                  <span class="getter" style="background:#5b9bd5;border-color:#3d7ab8;">every <span class="arrow">Button</span></span>
+                </div>
+                <div class="if-row">do</div>
+                <div class="if-body">
+                  <div class="setter" style="display:inline-flex; flex-direction:column; align-items:flex-start;">
+                    <div>set <span class="comp">Button</span> . <span class="comp">Text</span></div>
+                    <div style="margin-left:14px;">of component <span class="var-get">get <span class="arrow">item</span></span></div>
+                    <div style="margin-left:14px;">to
+                      <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                        <span class="math" style="background:#5b80b5;">13</span>
+                        −
+                        <span class="list-op" style="background:#4f95c3;">
+                          <span class="head">index in list thing
+                            <span class="var-get">get <span class="arrow">item</span></span>
+                            list
+                            <span class="getter" style="background:#5b9bd5;border-color:#3d7ab8;">every <span class="arrow">Button</span></span>
+                          </span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- when any Button.Click -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <b>any</b> <span class="comp">Button</span> .Click</div>
+          <div class="param-chip">component</div>
+          <div class="param-chip">notAlreadyHandled</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="call">
+                <div class="head">call <span class="comp">yaz</span></div>
+                <div class="arg" style="align-items:flex-start;">
+                  <span class="arg-label">x</span>
+                  <div class="setter" style="display:inline-flex; flex-direction:column; align-items:flex-start; padding:4px 8px;">
+                    <div><span class="comp">Button</span> . <span class="comp">Text</span></div>
+                    <div style="margin-left:14px;">of component <span class="var-get">get <span class="arrow">component</span></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- to yaz x -->
+      <div class="blk">
+        <div style="background:#9270b0; border:1px solid #6a4f87; border-radius:6px; padding-bottom:8px;">
+          <div style="padding:8px 14px; color:#fff; font-weight:500;">
+            <span class="gear"></span>to <span class="comp">yaz</span>
+            <span class="param-chip" style="background:#e08c2f;">x</span>
+          </div>
+          <div style="padding:0 12px;">
+            <div style="color:#fff; padding-left:12px;">do</div>
+            <div style="background:#9270b0; margin-left:12px; padding:4px 10px 4px 14px; border-left:3px solid #6a4f87;">
+              <div class="if" style="background:#e6a82e;">
+                <div class="if-row">
+                  for each <span class="param-chip">number</span> from <span class="math">1</span>
+                </div>
+                <div class="if-row" style="padding-left:60px;">to <span class="math"><span class="var-get">get <span class="arrow">x</span></span></span></div>
+                <div class="if-row" style="padding-left:60px;">by <span class="math">1</span></div>
+                <div class="if-row">do</div>
+                <div class="if-body">
+                  <div class="setter">
+                    set <span class="comp">Label1</span> . <span class="comp">Text</span> to
+                    <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                      <span class="gear"></span>join
+                      <span class="getter"><span class="comp">Label1</span> . <span class="arrow">Text</span></span>
+                      <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">" "</span>
+                      <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">"selam"</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>📌 Yeni Teknikler (Hepsi Önemli!)</h3>
+      <ul>
+        <li><b>every Button</b> (açık mavi getter) → ekrandaki <u>tüm Button'ları</u> liste olarak verir</li>
+        <li><b>for each item in list</b> → listedeki her elemanı tek tek <code>item</code>'a atayıp döngü kurar</li>
+        <li><b>set Button.Text of component (item) to ...</b> → hangi component'a yazılacağını dinamik olarak söyler (sadece <code>set Button1.Text</code> değil!)</li>
+        <li><b>index in list</b> → bir elemanın listedeki kaçıncı sırada olduğunu döner</li>
+        <li><b>13 − index</b> → buton sırasını ters çevirir (1 → 12, 2 → 11 ... 12 → 1)</li>
+      </ul>
+      <h3 style="margin-top:10px;">⭐ when any Button.Click — Sihirli Olay</h3>
+      <ul>
+        <li>Tek bir olay bloğuyla <b>tüm butonları</b> yakalar (12 ayrı olay yazmaya gerek yok!)</li>
+        <li><b>component</b> parametresi → hangi butona basıldığını söyler</li>
+        <li><b>get Button.Text of component (get component)</b> → basılan butonun yazısını alır</li>
+      </ul>
+      <h3 style="margin-top:10px;">🔁 for each number from 1 to X by 1</h3>
+      <ul>
+        <li>Sayaçlı döngü — number değişkeni 1, 2, 3 ... X olur</li>
+        <li><code>yaz</code> fonksiyonu butonun değeri kadar "selam" ekler</li>
+        <li>Buton metni 5 ise → 5 kere "selam" yazılır</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 11 — HESAP MAKİNESİ (Return Procedure + Spinner) ============== -->
+<div id="ex11" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 11 - Hesap Makinesi</div>
+      <div class="ai-label">1. Sayı:</div>
+      <input type="number" class="ai-textbox" id="tb11a" placeholder="Örn: 25">
+      <div class="ai-label">İşlem:</div>
+      <select class="ai-spinner" id="spinner11">
+        <option>+</option>
+        <option>-</option>
+        <option>×</option>
+        <option>÷</option>
+      </select>
+      <div class="ai-label">2. Sayı:</div>
+      <input type="number" class="ai-textbox" id="tb11b" placeholder="Örn: 4">
+      <div style="text-align:center; margin-top:15px;">
+        <button class="ai-button" onclick="btnHesaplaClick()" style="font-size:16px; padding:12px 30px;">HESAPLA</button>
+      </div>
+      <div style="text-align:center; padding:20px 10px; font-size:22px; font-weight:bold; color:#2d9e58;" id="label11">Sonuç: -</div>
+    </div>
+    <div class="notifier" id="notif11"></div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info">
+      <b>Designer:</b><br>
+      • TextBox1, TextBox2 (sayı girişleri, NumbersOnly=true)<br>
+      • Spinner1 (ElementsFromString=<code>+, -, ×, ÷</code>)<br>
+      • Button1 (Text="HESAPLA")<br>
+      • Label1 (sonuç gösterimi)<br>
+      • Notifier1 (sıfıra bölme uyarısı)
+    </div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-logic">Logic</div>
+        <div class="tb-cat tb-math">Math</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-proc">Procedures ⭐</div>
+        <div class="tb-cat tb-comp">Spinner1</div>
+      </div>
+    </div>
+
+    <div class="hint">💡 <b>Yeni Teknik:</b> <b>"to ... result"</b> — değer döndüren procedure (mor bloğun kapağı kapalı).</div>
+
+    <div class="workspace">
+      <!-- to hesapla a b islem (RETURN VALUE) -->
+      <div class="blk">
+        <div style="background:#9270b0; border:1px solid #6a4f87; border-radius:6px; padding-bottom:8px;">
+          <div style="padding:8px 14px; color:#fff; font-weight:500;">
+            <span class="gear"></span>to <span class="comp">hesapla</span>
+            <span class="param-chip" style="background:#e08c2f;">a</span>
+            <span class="param-chip" style="background:#e08c2f;">b</span>
+            <span class="param-chip" style="background:#e08c2f;">islem</span>
+          </div>
+          <div style="padding:0 12px;">
+            <div style="color:#fff; padding-left:12px;"><b>result</b></div>
+            <div style="background:#9270b0; margin-left:12px; padding:4px 10px 4px 14px; border-left:3px solid #6a4f87;">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic">
+                    <span class="var-get">get <span class="arrow">islem</span></span>
+                    =
+                    <span class="txt-block">+</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    <span class="var-get">get <span class="arrow">a</span></span>
+                    +
+                    <span class="var-get">get <span class="arrow">b</span></span>
+                  </span>
+                </div>
+                <div class="if-row">else if
+                  <span class="logic">
+                    <span class="var-get">get <span class="arrow">islem</span></span>
+                    =
+                    <span class="txt-block">-</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    <span class="var-get">get <span class="arrow">a</span></span>
+                    −
+                    <span class="var-get">get <span class="arrow">b</span></span>
+                  </span>
+                </div>
+                <div class="if-row">else if
+                  <span class="logic">
+                    <span class="var-get">get <span class="arrow">islem</span></span>
+                    =
+                    <span class="txt-block">×</span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    <span class="var-get">get <span class="arrow">a</span></span>
+                    ×
+                    <span class="var-get">get <span class="arrow">b</span></span>
+                  </span>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <span class="math" style="background:#5b80b5;padding:4px 8px;">
+                    <span class="var-get">get <span class="arrow">a</span></span>
+                    ÷
+                    <span class="var-get">get <span class="arrow">b</span></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- when Button1.Click -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">Button1</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic">
+                    <span class="logic">
+                      <span class="getter"><span class="comp">Spinner1</span> . <span class="arrow">Selection</span></span>
+                      =
+                      <span class="txt-block">÷</span>
+                    </span>
+                    <b style="margin:0 4px;">and</b>
+                    <span class="logic">
+                      <span class="getter"><span class="comp">TextBox2</span> . <span class="arrow">Text</span></span>
+                      =
+                      <span class="math">0</span>
+                    </span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call">
+                    <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                    <div class="arg"><span class="arg-label">notice</span> <span class="txt-block">Sıfıra bölme yapılamaz!</span></div>
+                  </div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="setter">
+                    set <span class="comp">Label1</span> . <span class="comp">Text</span> to
+                    <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                      <span class="gear"></span>join
+                      <span style="background:#fff;color:#333;border:1px solid rgba(0,0,0,0.2);border-radius:10px;padding:2px 8px;">"Sonuç: "</span>
+                      <span class="call" style="padding:4px 8px;">
+                        <div class="head">call <span class="comp">hesapla</span></div>
+                        <div class="arg"><span class="arg-label">a</span> <span class="getter"><span class="comp">TextBox1</span> . <span class="arrow">Text</span></span></div>
+                        <div class="arg"><span class="arg-label">b</span> <span class="getter"><span class="comp">TextBox2</span> . <span class="arrow">Text</span></span></div>
+                        <div class="arg"><span class="arg-label">islem</span> <span class="getter"><span class="comp">Spinner1</span> . <span class="arrow">Selection</span></span></div>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>📌 Yeni Kavram: Return Value (Sonuç Döndüren Fonksiyon)</h3>
+      <ul>
+        <li>Procedures kategorisinde 2 tür blok vardır:
+          <ul>
+            <li><b>to ... do</b> → işlem yapar, sonuç döndürmez (Örnek 9, 10)</li>
+            <li><b>to ... result</b> → işlem yapar VE değer döndürür ⭐ (bu örnek)</li>
+          </ul>
+        </li>
+        <li><code>call hesapla a=5 b=3 islem="+"</code> → fonksiyon 8 değerini döndürür, dışarıda kullanılır</li>
+        <li>Bu sayede aynı fonksiyonu farklı yerlerde defalarca çağırıp sonucunu alabilirsin</li>
+      </ul>
+      <h3 style="margin-top:10px;">🔀 if / else if / else Zinciri</h3>
+      <ul>
+        <li>4 farklı işlem: +, -, ×, ÷</li>
+        <li>Sarı if bloğunun mavi gear'ından "else if" eklenir</li>
+        <li>Hangi koşul tutarsa o satır çalışır, kalanlar atlanır</li>
+      </ul>
+      <h3 style="margin-top:10px;">⚠ Hata Kontrolü (and operatörü)</h3>
+      <ul>
+        <li><b>Logic</b> kategorisinden <code>and</code> bloğu → 2 koşul birden doğruysa</li>
+        <li>Spinner=÷ <b>VE</b> TextBox2=0 → Notifier ile uyarı</li>
+        <li>Sıfıra bölme matematik hatası, kullanıcıyı uyarmak iyi pratiktir</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ÖRNEK 12 — ALIŞVERİŞ LİSTESİ (Çoklu Procedure + Kategori) ============== -->
+<div id="ex12" class="container hidden">
+  <div class="phone">
+    <div class="screen">
+      <div class="app-title">Örnek 12 - Alışveriş Listesi</div>
+      <div class="ai-label">Ürün adı:</div>
+      <input type="text" class="ai-textbox" id="tb12" placeholder="Örn: Domates">
+      <div class="ai-label">Kategori:</div>
+      <select class="ai-spinner" id="spinner12">
+        <option>🥕 Sebze</option>
+        <option>🍎 Meyve</option>
+        <option>🥛 Süt Ürünleri</option>
+        <option>🍞 Fırın</option>
+        <option>🥤 İçecek</option>
+      </select>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <button class="ai-button" onclick="btnEkleUrunClick()" style="flex:1;">EKLE</button>
+        <button class="ai-button" onclick="btnTemizleClick()" style="flex:1; background:#ffcdd2;">TEMİZLE</button>
+      </div>
+      <div class="ai-label" style="margin-top:10px;">Liste (<span id="lblSayi12">0</span> ürün):</div>
+      <div class="ai-listview" id="lv12"></div>
+    </div>
+    <div class="notifier" id="notif12"></div>
+  </div>
+
+  <div class="blocks-panel">
+    <h2>🧩 Blok Editörü</h2>
+    <div class="designer-info">
+      <b>Designer:</b><br>
+      • TextBox1 (ürün adı)<br>
+      • Spinner1 (kategoriler)<br>
+      • BtnEkle, BtnTemizle<br>
+      • ListView1, Label1 (sayaç)<br>
+      • Notifier1
+    </div>
+    <div class="toolbox">
+      <div class="toolbox-row">
+        <div class="tb-cat tb-control">Control</div>
+        <div class="tb-cat tb-lists">Lists</div>
+        <div class="tb-cat tb-text">Text</div>
+        <div class="tb-cat tb-var">Variables</div>
+        <div class="tb-cat tb-proc">Procedures ⭐⭐</div>
+      </div>
+    </div>
+
+    <div class="hint">💡 <b>3 Procedure birden:</b> <code>ekle()</code>, <code>temizle()</code>, <code>guncelleSayac()</code> — herbiri tek bir iş yapar (Single Responsibility).</div>
+
+    <div class="workspace">
+      <!-- Global liste -->
+      <div class="blk">
+        <div class="when" style="background:#e08c2f; border-color:#b86e1c;">
+          <div class="when-title">
+            initialize global <span class="comp">urunler</span> to
+            <span class="list-op" style="display:inline-flex;flex-direction:row;gap:4px;padding:3px 8px;"><span class="head">create empty list</span></span>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- to ekle ad kategori -->
+      <div class="blk">
+        <div style="background:#9270b0; border:1px solid #6a4f87; border-radius:6px; padding-bottom:8px;">
+          <div style="padding:8px 14px; color:#fff; font-weight:500;">
+            <span class="gear"></span>to <span class="comp">ekle</span>
+            <span class="param-chip" style="background:#e08c2f;">ad</span>
+            <span class="param-chip" style="background:#e08c2f;">kategori</span>
+          </div>
+          <div style="padding:0 12px;">
+            <div style="color:#fff; padding-left:12px;">do</div>
+            <div style="background:#9270b0; margin-left:12px; padding:4px 10px 4px 14px; border-left:3px solid #6a4f87;">
+              <div class="list-op">
+                <div class="head"><span class="gear"></span>add items to list</div>
+                <div class="arg"><span class="arg-label">list</span> <span class="var-get">get global <span class="arrow">urunler</span></span></div>
+                <div class="arg" style="align-items:flex-start;">
+                  <span class="arg-label">item</span>
+                  <span style="display:inline-flex;align-items:center;background:#d4506e;color:#fff;border:1px solid #a83a55;border-radius:6px;padding:4px 8px;font-size:11px;gap:4px;">
+                    <span class="gear"></span>join
+                    <span class="txt-block">[</span>
+                    <span class="var-get">get <span class="arrow">kategori</span></span>
+                    <span class="txt-block">] </span>
+                    <span class="var-get">get <span class="arrow">ad</span></span>
+                  </span>
+                </div>
+              </div><br>
+              <div class="setter">
+                set <span class="comp">ListView1</span> . <span class="comp">Elements</span> to
+                <span class="var-get">get global <span class="arrow">urunler</span></span>
+              </div><br>
+              <div class="call" style="background:#9270b0;"><div class="head">call <span class="comp">guncelleSayac</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- to temizle (parametresiz) -->
+      <div class="blk">
+        <div style="background:#9270b0; border:1px solid #6a4f87; border-radius:6px; padding-bottom:8px;">
+          <div style="padding:8px 14px; color:#fff; font-weight:500;">
+            <span class="gear"></span>to <span class="comp">temizle</span>
+          </div>
+          <div style="padding:0 12px;">
+            <div style="color:#fff; padding-left:12px;">do</div>
+            <div style="background:#9270b0; margin-left:12px; padding:4px 10px 4px 14px; border-left:3px solid #6a4f87;">
+              <div class="setter">
+                set global <span class="comp">urunler</span> to
+                <span class="list-op" style="display:inline-flex;flex-direction:row;gap:4px;padding:3px 8px;"><span class="head">create empty list</span></span>
+              </div><br>
+              <div class="setter">
+                set <span class="comp">ListView1</span> . <span class="comp">Elements</span> to
+                <span class="var-get">get global <span class="arrow">urunler</span></span>
+              </div><br>
+              <div class="call" style="background:#9270b0;"><div class="head">call <span class="comp">guncelleSayac</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- to guncelleSayac (parametresiz) -->
+      <div class="blk">
+        <div style="background:#9270b0; border:1px solid #6a4f87; border-radius:6px; padding-bottom:8px;">
+          <div style="padding:8px 14px; color:#fff; font-weight:500;">
+            <span class="gear"></span>to <span class="comp">guncelleSayac</span>
+          </div>
+          <div style="padding:0 12px;">
+            <div style="color:#fff; padding-left:12px;">do</div>
+            <div style="background:#9270b0; margin-left:12px; padding:4px 10px 4px 14px; border-left:3px solid #6a4f87;">
+              <div class="setter">
+                set <span class="comp">Label1</span> . <span class="comp">Text</span> to
+                <span class="list-op" style="display:inline-flex;flex-direction:row;gap:4px;padding:3px 8px;">
+                  <span class="head">length of list
+                    <span class="var-get">get global <span class="arrow">urunler</span></span>
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- when BtnEkle.Click -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnEkle</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="if">
+                <div class="if-row">if
+                  <span class="logic">
+                    <span class="getter"><span class="comp">TextBox1</span> . <span class="arrow">Text</span></span>
+                    =
+                    <span class="txt-block"></span>
+                  </span>
+                </div>
+                <div class="if-row">then</div>
+                <div class="if-body">
+                  <div class="call">
+                    <div class="head">call <span class="comp">Notifier1</span> . <span class="comp">ShowAlert</span></div>
+                    <div class="arg"><span class="arg-label">notice</span> <span class="txt-block">Lütfen ürün adı yazın!</span></div>
+                  </div>
+                </div>
+                <div class="if-row">else</div>
+                <div class="if-body">
+                  <div class="call" style="background:#9270b0;">
+                    <div class="head">call <span class="comp">ekle</span></div>
+                    <div class="arg"><span class="arg-label">ad</span> <span class="getter"><span class="comp">TextBox1</span> . <span class="arrow">Text</span></span></div>
+                    <div class="arg"><span class="arg-label">kategori</span> <span class="getter"><span class="comp">Spinner1</span> . <span class="arrow">Selection</span></span></div>
+                  </div><br>
+                  <div class="setter">set <span class="comp">TextBox1</span> . <span class="comp">Text</span> to <span class="txt-block"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <!-- when BtnTemizle.Click -->
+      <div class="blk">
+        <div class="when">
+          <div class="when-title">when <span class="comp">BtnTemizle</span> .Click</div>
+          <div class="when-do">
+            <div class="when-do-label">do</div>
+            <div class="when-body">
+              <div class="call" style="background:#9270b0;"><div class="head">call <span class="comp">temizle</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explanation">
+      <h3>📌 Çoklu Procedure Tasarımı</h3>
+      <ul>
+        <li><b>ekle(ad, kategori)</b> → 2 parametre alır, <code>"[Kategori] Ürün"</code> formatında listeye ekler</li>
+        <li><b>temizle()</b> → parametresiz, listeyi sıfırlar</li>
+        <li><b>guncelleSayac()</b> → parametresiz, Label1'e ürün sayısını yazar</li>
+        <li>Hem <code>ekle</code> hem <code>temizle</code> içeride <code>call guncelleSayac</code> diyor → <b>fonksiyondan fonksiyon çağırma</b></li>
+      </ul>
+      <h3 style="margin-top:10px;">📋 Kullanılan Bloklar</h3>
+      <ul>
+        <li><b>add items to list</b> (Lists, açık mavi)</li>
+        <li><b>length of list</b> (Lists) → liste eleman sayısını verir</li>
+        <li><b>create empty list</b> → boş liste başlatma + temizleme</li>
+        <li><b>join</b> (Text, pembe) → "[Kategori] Ürün" oluşturma</li>
+        <li><b>get global urunler</b> (turuncu Variables)</li>
+      </ul>
+      <h3 style="margin-top:10px;">🎯 Hocanın Bakacağı Yerler</h3>
+      <ul>
+        <li>Boş ürün adı kontrolü (Notifier ile uyarı)</li>
+        <li>EKLE'den sonra TextBox temizleme (kullanıcı dostu)</li>
+        <li>Procedure'ları küçük ve tek işli tutmak (ekle ≠ temizle ≠ sayaç)</li>
+        <li>Kategori bilgisinin <b>join</b> ile ürün adına yapıştırılması</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- =================== JS =================== -->
+<script>
+function showExample(n) {
+  for (let i = 1; i <= 12; i++) {
+    document.getElementById('ex' + i).classList.add('hidden');
+  }
+  document.getElementById('ex' + n).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', i === n - 1);
+  });
+}
+
+function showNotifier(id, msg) {
+  const n = document.getElementById(id);
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(n._t);
+  n._t = setTimeout(() => n.classList.remove('show'), 2000);
+}
+
+/* ===== SÜRÜKLEME ===== */
+function makeDraggable(blk) {
+  let startX, startY, origX = 0, origY = 0, dragging = false;
+  blk.addEventListener('mousedown', (e) => {
+    if (e.target.closest('input, select, button')) return;
+    dragging = true;
+    blk.classList.add('dragging');
+    startX = e.clientX; startY = e.clientY;
+    const tr = (blk.style.transform || '').match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+    origX = tr ? parseFloat(tr[1]) : 0;
+    origY = tr ? parseFloat(tr[2]) : 0;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    blk.style.transform = `translate(${origX + e.clientX - startX}px, ${origY + e.clientY - startY}px)`;
+  });
+  document.addEventListener('mouseup', () => {
+    if (dragging) { dragging = false; blk.classList.remove('dragging'); }
+  });
+}
+document.querySelectorAll('.workspace .blk').forEach(makeDraggable);
+
+/* ===== ÖRNEK 1 ===== */
+const PIC = { tavuk: '🐔', uzum: '🍇', peynir: '🧀' };
+function setImg(emoji) { document.getElementById('img1').textContent = emoji; }
+function cb1Changed() {
+  const cb = document.getElementById('cb1');
+  if (cb.checked) { setImg(PIC.tavuk); document.getElementById('cb2').checked=false; document.getElementById('cb3').checked=false; }
+  else setImg('');
+}
+function cb2Changed() {
+  const cb = document.getElementById('cb2');
+  if (cb.checked) { setImg(PIC.uzum); document.getElementById('cb1').checked=false; document.getElementById('cb3').checked=false; }
+  else setImg('');
+}
+function cb3Changed() {
+  const cb = document.getElementById('cb3');
+  if (cb.checked) { setImg(PIC.peynir); document.getElementById('cb1').checked=false; document.getElementById('cb2').checked=false; }
+  else setImg('');
+}
+
+/* ===== ÖRNEK 2 ===== */
+let list2 = [];
+function renderList(elementId, arr, onClick) {
+  const lv = document.getElementById(elementId);
+  lv.innerHTML = '';
+  arr.forEach((item) => {
+    const div = document.createElement('div');
+    div.className = 'ai-listview-item';
+    div.textContent = item;
+    if (onClick) div.onclick = () => onClick(item);
+    lv.appendChild(div);
+  });
+}
+function btnEkleClick() {
+  const tb = document.getElementById('tb1');
+  const v = tb.value.trim();
+  if (!v) return;
+  if (list2.includes(v)) showNotifier('notif2', 'Bu isim zaten listede var!');
+  else { list2.push(v); renderList('lv1', list2); tb.value = ''; }
+}
+function btnAraClick() {
+  const v = document.getElementById('tb2').value.trim();
+  if (!v) return;
+  if (list2.includes(v)) showNotifier('notif2', 'Bulundu: ' + v);
+  else showNotifier('notif2', 'Bu isim listede yok!');
+}
+
+/* ===== Müzik (Web Audio) ===== */
+let audioCtx = null;
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+class TonePlayer {
+  constructor(notes, duration) {
+    this.notes = notes; this.duration = duration;
+    this.startTime = 0; this.pausedAt = 0;
+    this.isPlaying = false; this.osc = null; this.gain = null;
+    this.timer = null; this.onTick = null; this.onEnd = null;
+  }
+  _playFrom(offset) {
+    const ctx = getCtx();
+    this.osc = ctx.createOscillator();
+    this.gain = ctx.createGain();
+    this.osc.type = 'sine';
+    this.osc.connect(this.gain);
+    this.gain.connect(ctx.destination);
+    this.gain.gain.value = 0.15;
+    const noteDur = this.duration / this.notes.length;
+    const now = ctx.currentTime;
+    let t = now;
+    for (let i = 0; i < this.notes.length; i++) {
+      const noteEnd = (i + 1) * noteDur;
+      if (noteEnd <= offset) continue;
+      const startInNote = Math.max(0, offset - i * noteDur);
+      const playLen = noteDur - startInNote;
+      this.osc.frequency.setValueAtTime(this.notes[i], t);
+      t += playLen;
+    }
+    this.osc.start(now);
+    this.osc.stop(t);
+    this.startTime = ctx.currentTime - offset;
+    this.isPlaying = true;
+    this.osc.onended = () => {
+      if (this.isPlaying) { this.isPlaying = false; this.pausedAt = 0; if (this.onEnd) this.onEnd(); }
+    };
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      if (!this.isPlaying) return;
+      const elapsed = ctx.currentTime - this.startTime;
+      if (this.onTick) this.onTick(Math.min(elapsed, this.duration));
+    }, 100);
+  }
+  start() { if (!this.isPlaying) this._playFrom(this.pausedAt); }
+  pause() {
+    if (!this.isPlaying) return;
+    this.pausedAt = getCtx().currentTime - this.startTime;
+    try { this.osc.stop(); } catch(e){}
+    this.isPlaying = false;
+    if (this.timer) clearInterval(this.timer);
+  }
+  stop() {
+    try { if (this.osc) this.osc.stop(); } catch(e){}
+    this.isPlaying = false; this.pausedAt = 0;
+    if (this.timer) clearInterval(this.timer);
+    if (this.onTick) this.onTick(0);
+  }
+}
+const SONG = [262, 294, 330, 349, 392, 440, 494, 523, 494, 440, 392, 349, 330, 294, 262, 294, 330, 349, 392, 440];
+
+const player3 = new TonePlayer(SONG, 30);
+player3.onTick = (t) => {
+  document.getElementById('player3-bar').style.width = (t / 30 * 100) + '%';
+  const m = Math.floor(t / 60), s = Math.floor(t % 60);
+  document.getElementById('player3-time').textContent = `${m}:${s.toString().padStart(2,'0')} / 0:30`;
+};
+player3.onEnd = () => {
+  document.getElementById('btnCal3').textContent = 'ÇAL';
+  document.getElementById('player3-status').textContent = 'Bitti';
+};
+function btnCal3Click() {
+  const btn = document.getElementById('btnCal3');
+  if (btn.textContent === 'ÇAL') {
+    getCtx().resume().then(() => {
+      player3.start();
+      btn.textContent = 'DURDUR';
+      document.getElementById('player3-status').textContent = '▶️ Çalıyor (Pause modu)';
+    });
+  } else {
+    player3.pause();
+    btn.textContent = 'ÇAL';
+    document.getElementById('player3-status').textContent = '⏸️ Duraklatıldı (kaldığı yerden devam)';
+  }
+}
+
+const player4 = new TonePlayer(SONG, 30);
+player4.onTick = (t) => {
+  document.getElementById('player4-bar').style.width = (t / 30 * 100) + '%';
+  const m = Math.floor(t / 60), s = Math.floor(t % 60);
+  document.getElementById('player4-time').textContent = `${m}:${s.toString().padStart(2,'0')} / 0:30`;
+};
+player4.onEnd = () => {
+  document.getElementById('btnCal4').textContent = 'ÇAL';
+  document.getElementById('player4-status').textContent = 'Bitti';
+};
+function btnCal4Click() {
+  const btn = document.getElementById('btnCal4');
+  if (btn.textContent === 'ÇAL') {
+    getCtx().resume().then(() => {
+      player4.start();
+      btn.textContent = 'DURDUR';
+      document.getElementById('player4-status').textContent = '▶️ Çalıyor (Stop modu)';
+    });
+  } else {
+    player4.stop();
+    btn.textContent = 'ÇAL';
+    document.getElementById('player4-status').textContent = '⏹️ Durduruldu (baştan başlayacak)';
+  }
+}
+
+/* ===== ÖRNEK 5 ===== */
+const SONGS = {
+  'İstiklal Marşı':    [392, 440, 494, 523, 587, 523, 494, 440, 392, 349, 330, 349, 392, 440, 392],
+  'Gençlik Marşı':     [330, 349, 392, 440, 494, 440, 392, 349, 330, 294, 262, 294, 330, 392, 330],
+  'Onuncu Yıl Marşı':  [262, 294, 330, 349, 392, 440, 494, 523, 494, 440, 392, 349, 330, 294, 262]
+};
+const FILES = {
+  'İstiklal Marşı':   'istiklal.mp3',
+  'Gençlik Marşı':    'genclik.mp3',
+  'Onuncu Yıl Marşı': 'onuncu.mp3'
+};
+let list5 = [];
+let currentPlayer5 = null;
+function btnEkleMars() {
+  const sel = document.getElementById('spinner1').value;
+  if (list5.includes(sel)) showNotifier('notif5', 'Bu marş zaten listede!');
+  else { list5.push(sel); renderList('lv5', list5, onMarsClick); }
+}
+function onMarsClick(name) {
+  if (currentPlayer5) currentPlayer5.stop();
+  currentPlayer5 = new TonePlayer(SONGS[name], 8);
+  currentPlayer5.onEnd = () => {
+    document.getElementById('player5-status').textContent = '▶️ Şu an çalan: -';
+  };
+  getCtx().resume().then(() => {
+    currentPlayer5.start();
+    document.getElementById('player5-status').textContent = '▶️ Şu an çalan: ' + name + ' (' + FILES[name] + ')';
+  });
+}
+
+/* ===== ÖRNEK 6: NOTIFIER ===== */
+function btnSelamlaClick() {
+  const ad = document.getElementById('tb6').value.trim();
+  if (!ad) {
+    showNotifier('notif6', 'Merhaba, !');
+  } else {
+    showNotifier('notif6', 'Merhaba, ' + ad + '!');
+  }
+}
+
+/* ===== ÖRNEK 7: SPLIT ===== */
+let kayitlar7 = [];
+let currentPlayer7 = null;
+
+function btnEkle7Click() {
+  const sel = document.getElementById('spinner7').value;  // örn: "istiklal.mp3"
+  if (kayitlar7.includes(sel)) {
+    showNotifier('notif7', 'Bu ses zaten listede!');
+    return;
+  }
+  // SPLIT işlemi: "istiklal.mp3" → ["istiklal", "mp3"] → index 1 (App Inventor 1-based) → "istiklal"
+  const parcalar = sel.split('.');
+  const temizAd = parcalar[0];   // index 1 (App Inventor) = JS'de [0]
+  kayitlar7.push(temizAd);
+  renderList('lv7', kayitlar7, onMars7Click);
+}
+
+function onMars7Click(temizAd) {
+  // JOIN işlemi: "istiklal" + ".mp3" → "istiklal.mp3"
+  const tamDosyaAdi = temizAd + '.mp3';
+
+  if (currentPlayer7) currentPlayer7.stop();
+
+  // Hangi melodi çalacak — dosya adına göre eşle
+  let notes;
+  if (tamDosyaAdi === 'istiklal.mp3')      notes = SONGS['İstiklal Marşı'];
+  else if (tamDosyaAdi === 'genclik.mp3')  notes = SONGS['Gençlik Marşı'];
+  else if (tamDosyaAdi === 'onuncu.mp3')   notes = SONGS['Onuncu Yıl Marşı'];
+
+  currentPlayer7 = new TonePlayer(notes, 8);
+  currentPlayer7.onEnd = () => {
+    document.getElementById('player7-status').textContent = '▶️ Şu an çalan: -';
+  };
+  getCtx().resume().then(() => {
+    currentPlayer7.start();
+    document.getElementById('player7-status').textContent =
+      '▶️ Player1.Source = "' + tamDosyaAdi + '"';
+  });
+}
+
+/* ===== ÖRNEK 8: SLIDER ÇARPIM (global + round + join) ===== */
+let globalX = 0, globalY = 0;
+function updateLabel1() {
+  document.getElementById('label1').textContent =
+    globalX + ' X ' + globalY + ' = ' + (globalX * globalY);
+}
+function slider1Changed() {
+  globalX = Math.round(parseFloat(document.getElementById('slider1').value));
+  updateLabel1();
+}
+function slider2Changed() {
+  globalY = Math.round(parseFloat(document.getElementById('slider2').value));
+  updateLabel1();
+}
+
+/* ===== ÖRNEK 9: FONKSIYONLU ÇARPIM (procedure ile) ===== */
+// Procedure: to guncelle x y
+function guncelle(x, y) {
+  document.getElementById('label1b').textContent = x + ' X ' + y + ' = ' + (x * y);
+}
+function slider1bChanged() {
+  const x = Math.round(parseFloat(document.getElementById('slider1b').value));
+  const y = Math.round(parseFloat(document.getElementById('slider2b').value));
+  guncelle(x, y);
+}
+function slider2bChanged() {
+  const x = Math.round(parseFloat(document.getElementById('slider1b').value));
+  const y = Math.round(parseFloat(document.getElementById('slider2b').value));
+  guncelle(x, y);
+}
+
+/* ===== ÖRNEK 10: FOR EACH + EVERY BUTTON + ANY BUTTON ===== */
+(function buildButtonGrid() {
+  const grid = document.getElementById('btnGrid');
+  if (!grid) return;
+  // 12 buton oluştur (Button1..Button12)
+  // PDF'teki sıra: 1,2,3 / 5,4,6 / 7,8,9 / 10,11,12 — biz düz 1..12 koyuyoruz
+  // Initialize bloğu: 13 - index ile ters atama → ama ekranda 1..12 görünüyor.
+  // Aslında PDF'teki Initialize: every Button listesindeki sıraya 13-index atıyor.
+  // Eğer butonlar designer'da Button1, Button2, ... sırayla yerleştirilmişse,
+  // Button1.Text=12, Button2.Text=11... Button12.Text=1 olur.
+  // Ama ekranda 1..12 göründüğüne göre butonlar tersten yerleştirilmiş demek.
+  // Biz net olsun diye 1..12 yapalım, kullanıcı tıkladığında o sayı kadar selam yazalım.
+  for (let i = 1; i <= 12; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'ai-button';
+    btn.textContent = i;
+    btn.style.padding = '12px 0';
+    btn.style.margin = '0';
+    btn.onclick = () => anyButtonClick(i);
+    grid.appendChild(btn);
+  }
+})();
+
+// Procedure: to yaz x → x kere "selam" ekler
+function yaz(x) {
+  const lbl = document.getElementById('label10');
+  // PDF'teki: set Label1.Text to (join Label1.Text " " "selam")
+  for (let n = 1; n <= x; n++) {
+    lbl.textContent = lbl.textContent + ' selam';
+  }
+}
+
+function anyButtonClick(buttonValue) {
+  // Önceki sonucu temizle (görsel netlik için)
+  document.getElementById('label10').textContent = '';
+  // call yaz(x = Button.Text of component) — burada buttonValue
+  yaz(buttonValue);
+}
+
+/* ===== ÖRNEK 11: HESAP MAKİNESİ (Return-value procedure) ===== */
+// Procedure: to hesapla a b islem result
+function hesapla(a, b, islem) {
+  if (islem === '+') return a + b;
+  if (islem === '-') return a - b;
+  if (islem === '×') return a * b;
+  if (islem === '÷') return a / b;
+}
+function btnHesaplaClick() {
+  const aStr = document.getElementById('tb11a').value.trim();
+  const bStr = document.getElementById('tb11b').value.trim();
+  const islem = document.getElementById('spinner11').value;
+  if (!aStr || !bStr) {
+    showNotifier('notif11', 'Lütfen iki sayıyı da girin!');
+    return;
+  }
+  const a = parseFloat(aStr);
+  const b = parseFloat(bStr);
+  // Sıfıra bölme kontrolü (Logic: AND)
+  if (islem === '÷' && b === 0) {
+    showNotifier('notif11', 'Sıfıra bölme yapılamaz!');
+    return;
+  }
+  const sonuc = hesapla(a, b, islem);
+  // Tam sayı ise olduğu gibi, ondalıklıysa 2 basamak
+  const formatli = Number.isInteger(sonuc) ? sonuc : sonuc.toFixed(2);
+  document.getElementById('label11').textContent = 'Sonuç: ' + formatli;
+}
+
+/* ===== ÖRNEK 12: ALIŞVERİŞ LİSTESİ (Çoklu procedure) ===== */
+let urunler12 = [];
+
+// Procedure: to ekle ad kategori
+function ekleProc(ad, kategori) {
+  urunler12.push('[' + kategori + '] ' + ad);
+  renderList('lv12', urunler12);
+  guncelleSayacProc();
+}
+// Procedure: to temizle
+function temizleProc() {
+  urunler12 = [];
+  renderList('lv12', urunler12);
+  guncelleSayacProc();
+}
+// Procedure: to guncelleSayac
+function guncelleSayacProc() {
+  document.getElementById('lblSayi12').textContent = urunler12.length;
+}
+
+function btnEkleUrunClick() {
+  const ad = document.getElementById('tb12').value.trim();
+  if (ad === '') {
+    showNotifier('notif12', 'Lütfen ürün adı yazın!');
+    return;
+  }
+  const kategori = document.getElementById('spinner12').value;
+  ekleProc(ad, kategori);
+  document.getElementById('tb12').value = '';
+}
+function btnTemizleClick() {
+  temizleProc();
+  showNotifier('notif12', 'Liste temizlendi.');
+}
+</script>
+</body>
+</html>
